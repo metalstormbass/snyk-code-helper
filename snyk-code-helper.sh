@@ -83,11 +83,11 @@ for i in $(seq 0 $RESULT); do
             CODELINENUMBER=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines['$k'].lineNumber')
             CODELINECHANGE=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines['$k'].lineChange')
             if [[ "$CODELINECHANGE" == '"removed"' ]]; then 
-                echo "${RED}$CODELINENUMBER $CODELINE${NC}"
+                echo "${RED}$CODELINENUMBER:  $CODELINE${NC}"
             elif [[ "$CODELINECHANGE" == '"added"' ]]; then 
-                echo "${GREEN}$CODELINENUMBER $CODELINE${NC}"
+                echo "${GREEN}$CODELINENUMBER:  $CODELINE${NC}"
             elif [[ "$CODELINECHANGE" == '"none"' ]]; then 
-                echo "$CODELINENUMBER $CODELINE"
+                echo "$CODELINENUMBER:  $CODELINE"
             fi
         done
         printf "\n"
