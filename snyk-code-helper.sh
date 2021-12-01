@@ -69,7 +69,7 @@ for i in $(seq 0 $RESULT); do
     echo ${GREEN}$MESSAGE${NC}
  
     printf "\n"
-    printf "${PURPLE}Fix Inspiration${NC} \n"
+    printf "${BLUE}Fix Inspiration${NC} \n"
     for j in $(seq 0 2); do
         printf "Source: "
         EXAMPLEGITURL=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].commitURL')
