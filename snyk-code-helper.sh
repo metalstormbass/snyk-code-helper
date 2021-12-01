@@ -36,8 +36,10 @@ RESULT=$(cat snyk_code_results.json | jq '.runs[0].results' | jq length );
 RESULT=$((RESULT - 1)); 
 
 for i in $(seq 0 $RESULT); do
-    RULEID=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].ruleId')     
-    echo "${PURPLE}>>>>>>>> $RULEID <<<<<<<<${NC}"
+
+    RULEID=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].ruleId')         
+    ISSUE=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .shortDescription.text')  
+    echo "${PURPLE}>>>>>>>> $ISSUE <<<<<<<<${NC}"
     
     printf  "File: " 
     FILENAME=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].locations[].physicalLocation.artifactLocation.uri')
@@ -65,6 +67,31 @@ for i in $(seq 0 $RESULT); do
     printf "Remediation Guidance: "
     MESSAGE=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].message.text')
     echo ${GREEN}$MESSAGE${NC}
+ 
+    printf "\n"
+    printf "${PURPLE}Fix Inspiration${NC} \n"
+    for j in $(seq 0 2); do
+        printf "Source: "
+        EXAMPLEGITURL=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].commitURL')
+        echo $EXAMPLEGITURL
+        printf "\n"
+
+        NUMOFLINES=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines | length')
+        NUMOFLINES=$((NUMOFLINES - 1)); 
+        for k in $(seq 0 $NUMOFLINES); do
+            CODELINE=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines['$k'].line')
+            CODELINENUMBER=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines['$k'].lineNumber')
+            CODELINECHANGE=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines['$k'].lineChange')
+            if [[ "$CODELINECHANGE" == '"removed"' ]]; then 
+                echo "${RED}$CODELINENUMBER $CODELINE${NC}"
+            elif [[ "$CODELINECHANGE" == '"added"' ]]; then 
+                echo "${GREEN}$CODELINENUMBER $CODELINE${NC}"
+            elif [[ "$CODELINECHANGE" == '"none"' ]]; then 
+                echo "$CODELINENUMBER $CODELINE"
+            fi
+        done
+        printf "\n"
+    done
     printf "\n\n"
 done
 
