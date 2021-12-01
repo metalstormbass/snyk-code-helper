@@ -5,4 +5,4 @@
 This is a script to provide addtional information from a Snyk Code scan. Requires ```jq``` to be installed.
 
 Usage:
-```snyk iac test --json | ./snyk-code-helper.sh```
+```snyk code test --json | ./snyk-code-helper.sh```
