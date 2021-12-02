@@ -59,39 +59,29 @@ for i in $(seq 0 $RESULT); do
                 echo "${GRAY}Low${NC}"
             fi
     
-    printf "Affected Line(s): "
-    STARTLINE=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].locations[].physicalLocation.region.startLine')
-    ENDLINE=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].locations[].physicalLocation.region.endLine')
-    echo "The issue is located from line $STARTLINE to line $ENDLINE in $FILENAME"
+    #Dataflow
+    printf "\n"
+    echo "${BLUE}Dataflow:${NC} "
+    DATAFLOWLINES=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].codeFlows[].threadFlows[].locations | length ') 
+    DATAFLOWLINES=$((DATAFLOWLINES - 1));
+    for j in $(seq 0 $DATAFLOWLINES); do
+        DFSTART=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].codeFlows[].threadFlows[].locations['$j'].location.physicalLocation.region.startLine')
+        DFEND=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].codeFlows[].threadFlows[].locations['$j'].location.physicalLocation.region.endLine')
+        FILENAME=$(echo "$FILENAME" | sed -e 's/^"//' -e 's/"$//')
+        
+        if [[ "$DFSTART" != "$DFEXISTS" ]]; then 
+            printf "${BLUE}$DFSTART${NC}: "
+            sed -n ${DFSTART},${DFEND}p ${FILENAME}
+        fi
 
-    printf "Remediation Guidance: "
+        DFEXISTS=${DFSTART}
+    done
+    printf "\n"
+
+    printf "Description: "
     MESSAGE=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].message.text')
     echo ${GREEN}$MESSAGE${NC}
- 
-    printf "\n"
-    printf "${BLUE}Fix Inspiration${NC} \n"
-    for j in $(seq 0 2); do
-        printf "Source: "
-        EXAMPLEGITURL=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].commitURL')
-        echo $EXAMPLEGITURL
-        printf "\n"
 
-        NUMOFLINES=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines | length')
-        NUMOFLINES=$((NUMOFLINES - 1)); 
-        for k in $(seq 0 $NUMOFLINES); do
-            CODELINE=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines['$k'].line')
-            CODELINENUMBER=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines['$k'].lineNumber')
-            CODELINECHANGE=$(cat snyk_code_results.json | jq '.runs[0].tool.driver.rules[] | select(.id=='$RULEID')| .properties.exampleCommitFixes['$j'].lines['$k'].lineChange')
-            if [[ "$CODELINECHANGE" == '"removed"' ]]; then 
-                echo "${RED}$CODELINENUMBER:  $CODELINE${NC}"
-            elif [[ "$CODELINECHANGE" == '"added"' ]]; then 
-                echo "${GREEN}$CODELINENUMBER:  $CODELINE${NC}"
-            elif [[ "$CODELINECHANGE" == '"none"' ]]; then 
-                echo "$CODELINENUMBER:  $CODELINE"
-            fi
-        done
-        printf "\n"
-    done
     printf "\n\n"
 done
 
