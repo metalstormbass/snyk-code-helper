@@ -4,8 +4,10 @@
 
 This is a script to provide addtional information from a Snyk Code scan. Requires ```jq``` to be installed.
 
-Install:
+Install:  
 ```cp ./snyk-code-helper.sh /usr/local/bin```   
 
 Usage:
 ```snyk code test --json | ./snyk-code-helper.sh```
+
+For CI/CD use ```snyk-code-helper-nc.sh``` for uncolorized output
