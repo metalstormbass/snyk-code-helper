@@ -8,7 +8,7 @@ Install:
 ```cp ./snyk-code-helper.sh /usr/local/bin```   
 
 Usage:
-```snyk code test --json | ./snyk-code-helper.sh```
+```snyk code test --json | snyk-code-helper.sh```
 
 For CI/CD use ```snyk-code-helper-nc.sh``` for uncolorized output
 
