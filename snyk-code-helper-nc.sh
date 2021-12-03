@@ -50,7 +50,12 @@ for i in $(seq 0 $RESULT); do
             elif [[ "$SEVERITY" == '"note"' ]]; then 
                 echo "Low"
             fi
-    
+
+    printf "Sink: "
+    STARTLINE=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].locations[].physicalLocation.region.startLine')
+    ENDLINE=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].locations[].physicalLocation.region.endLine')
+    echo "The sink is located from line $STARTLINE to line $ENDLINE in $FILENAME"    
+
     #Dataflow
     printf "\n"
     echo "Dataflow: "

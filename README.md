@@ -11,3 +11,6 @@ Usage:
 ```snyk code test --json | ./snyk-code-helper.sh```
 
 For CI/CD use ```snyk-code-helper-nc.sh``` for uncolorized output
+
+Limitations: <br>
+This tool needs to be run in the same directory that the code is being scanned.
