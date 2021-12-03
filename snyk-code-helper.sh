@@ -73,13 +73,17 @@ for i in $(seq 0 $RESULT); do
     for j in $(seq 0 $DATAFLOWLINES); do
         DFSTART=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].codeFlows[].threadFlows[].locations['$j'].location.physicalLocation.region.startLine')
         DFEND=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].codeFlows[].threadFlows[].locations['$j'].location.physicalLocation.region.endLine')
-        FILENAME=$(echo "$FILENAME" | sed -e 's/^"//' -e 's/"$//')
-        
+        FILE=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].codeFlows[].threadFlows[].locations['$j'].location.physicalLocation.artifactLocation.uri')
+        FILE=$(echo "$FILE" | sed -e 's/^"//' -e 's/"$//')
+
+        if [[ "$FILE" != "$FILEEXISTS" ]]; then   
+        printf "File: ${FILE}\n"
+        fi
         if [[ "$DFSTART" != "$DFEXISTS" ]]; then 
             printf "${BLUE}$DFSTART${NC}: "
-            sed -n ${DFSTART},${DFEND}p ${FILENAME}
+            sed -n ${DFSTART},${DFEND}p ${FILE}
         fi
-
+        FILEEXISTS=${FILE}
         DFEXISTS=${DFSTART}
     done
     printf "\n"
@@ -87,7 +91,8 @@ for i in $(seq 0 $RESULT); do
     printf "Description: "
     MESSAGE=$(cat snyk_code_results.json | jq '.runs[0].results['$i'].message.text')
     echo ${GREEN}$MESSAGE${NC}
-
+    
+    FILE=""
     printf "\n\n"
 done
 
